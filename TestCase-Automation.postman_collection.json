@@ -1,0 +1,965 @@
+{
+	"info": {
+		"_postman_id": "8ae58588-094b-43a8-b9e2-ace4d9eb7b75",
+		"name": "TestCase-Automation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CityDirectory_Sucess",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response time is less than 3000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city/directory?pageSize=20&pageIndex=1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city",
+						"directory"
+					],
+					"query": [
+						{
+							"key": "pageSize",
+							"value": "20"
+						},
+						{
+							"key": "pageIndex",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CityDirectoryNotFound",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Invalid Page Index, status should be 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://trac360-new-shipmentapi.azurewebsites.net/api/v1/city/directory?pageSize=20&pageIndex=99999",
+					"protocol": "https",
+					"host": [
+						"trac360-new-shipmentapi",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city",
+						"directory"
+					],
+					"query": [
+						{
+							"key": "pageSize",
+							"value": "20"
+						},
+						{
+							"key": "pageIndex",
+							"value": "99999"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_Add_Success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"City Saved\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"let cityId = pm.collectionVariables.get(\"cityId\");\r",
+							"if(!pm.response.json() || pm.response.json() > 0) {\r",
+							"    console.log(pm.response.json())\r",
+							"    pm.collectionVariables.set('cityId',pm.response.json())\r",
+							"\r",
+							"}\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var allowed = \"abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXY\";\r",
+							"var cityName = allowed.split('').sort(function(){return 0.5-Math.random()}).join('');\r",
+							"\r",
+							"console.log(cityName)\r",
+							"\r",
+							"var body = {\r",
+							"  id: 0,\r",
+							"  city : cityName ,\r",
+							"  zoneId: 1,\r",
+							"  countryId: 101,\r",
+							"  countryCode: \"IN\",\r",
+							"  stateId: 4022\r",
+							"}\r",
+							" console.log(JSON.stringify(body))\r",
+							"\r",
+							"var body_str = JSON.stringify(body); \r",
+							"pm.environment.set('request_body', body_str); // this sets an environment variable with the stringified body\r",
+							"pm.collectionVariables.set('cityName', cityName  )\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{request_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_AlreadyExist_Conflict",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"City Name Already Exists\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate Http Status Code\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.HttpStatus).to.eql(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response message\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.Message).to.eql(\"City Name Already Exists\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log(pm.collectionVariables.get('cityName'))\r",
+							"\r",
+							"var body = {\r",
+							"  id: 0,\r",
+							"  city : pm.collectionVariables.get('cityName') ,\r",
+							"  zoneId: 1,\r",
+							"  countryId: 101,\r",
+							"  countryCode: \"IN\",\r",
+							"  stateId: 4022\r",
+							"}\r",
+							" console.log(JSON.stringify(body))\r",
+							"\r",
+							"var body_str = JSON.stringify(body); \r",
+							"pm.environment.set('request_body', body_str); // this sets an environment variable with the stringified body"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{request_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_ID_NotEqualToZero_BadRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Please Enter Valid City-Id ( City-Id Should Be 0)\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate Http Status Code\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.HttpStatus).to.eql(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response message\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.Message).to.eql(\"Please Enter Valid City-Id ( City-Id Should Be 0)\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 3,\r\n  \"city\": \"Gaziyabad\",\r\n  \"zoneId\": 1,\r\n  \"countryId\": 101,\r\n  \"countryCode\": \"IN\",\r\n  \"stateId\": 4022\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_InvalidStateId_BadRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Please Enter Valid Country/State Details\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate Http Status Code\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.HttpStatus).to.eql(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response message\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.Message).to.eql(\"Please Enter Valid Country/State Details  \");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 0,\r\n  \"city\": \"Gaziyabad\",\r\n  \"zoneId\": 1,\r\n  \"countryId\": 101,\r\n  \"countryCode\": \"IN\",\r\n  \"stateId\": 1027\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_CountryIdGreaterThanZero_BadRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'Country Id' must be greater than '0'.\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.messages[0].message).to.eql(\"'Country Id' must be greater than '0'.\");  \r",
+							"});\r",
+							"pm.test(\"'Country Id' must not be empty.\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.messages[1].message).to.eql(\"'Country Id' must not be empty.\");  \r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 0,\r\n  \"city\": \"Gaziyabad test14\",\r\n  \"zoneId\": 1,\r\n  \"countryId\": 0,\r\n  \"countryCode\": \"IN\",\r\n  \"stateId\": 4027\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_StateIdGreaterThanZero_BadRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'State Id' must be greater than '0'.\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.messages[0].message).to.eql(\"'State Id' must be greater than '0'.\");  \r",
+							"});\r",
+							"pm.test(\"'State Id' must not be empty.\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.messages[1].message).to.eql(\"'State Id' must not be empty.\");  \r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 0,\r\n  \"city\": \"Gaziyabad\",\r\n  \"zoneId\": 1,\r\n  \"countryId\": 101,\r\n  \"countryCode\": \"IN\",\r\n  \"stateId\": 0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_ShouldNotEmpty_BadRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'City' must not be empty.\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.messages[0].message).to.eql(\"'City' must not be empty.\");  \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 0,\r\n  \"city\": \"\",\r\n  \"zoneId\": 1,\r\n  \"countryId\": 101,\r\n  \"countryCode\": \"IN\",\r\n  \"stateId\": 4022\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_MaxLength50_BadRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"The length of 'City' must be 50 characters or fewer. You entered 102 characters.\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.messages[0].message).to.eql(\"The length of 'City' must be 50 characters or fewer. You entered 102 characters.\");  \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 0,\r\n  \"city\": \"Gaziyabad jsfjksdhfkjsdhf dsjhfdsjfhsdhfskjdhfkjdshf dsjhdsjfdskjfdskjfkjdsfdskjhfdskjfkjdshfkjdsfjdsf\",\r\n  \"zoneId\": 1,\r\n  \"countryId\": 101,\r\n  \"countryCode\": \"IN\",\r\n  \"stateId\": 4022\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_Update_Success",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log(pm.collectionVariables.get('cityId'))\r",
+							"pm.variables.set('cityId',pm.collectionVariables.get('cityId'))\r",
+							"console.log(pm.variables.get('cityId'))\r",
+							"\r",
+							"var allowed = \"abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXY\";\r",
+							"var cityName = allowed.split('').sort(function(){return 0.5-Math.random()}).join('');\r",
+							"\r",
+							"console.log(cityName)\r",
+							"\r",
+							"var body = {\r",
+							"  id: pm.collectionVariables.get('cityId'),\r",
+							"  city : cityName ,\r",
+							"  zoneId: 1,\r",
+							"  countryId: 101,\r",
+							"  countryCode: \"IN\",\r",
+							"  stateId: 4022\r",
+							"}\r",
+							" console.log(JSON.stringify(body))\r",
+							"\r",
+							"var body_str = JSON.stringify(body); \r",
+							"pm.environment.set('request_body', body_str); // this sets an environment variable with the stringified body"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"City Saved\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{request_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city/:cityId",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city",
+						":cityId"
+					],
+					"variable": [
+						{
+							"key": "cityId",
+							"value": "{{cityId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_Update_Without_BadRequest",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var body = {\r",
+							"//   id: 1,\r",
+							"//   city : 'test city' + Date.now().toString() ,\r",
+							"//   zoneId: 1,\r",
+							"//   countryId: 101,\r",
+							"//   countryCode: \"IN\",\r",
+							"//   stateId: 4022\r",
+							"}\r",
+							" console.log(JSON.stringify(body))\r",
+							"\r",
+							"var body_str = JSON.stringify(body); \r",
+							"pm.environment.set('request_body', body_str); // this sets an environment variable with the stringified body"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"A non-empty request body is require\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "// {{request_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city/63",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city",
+						"63"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_Update_CityIdNotMatchedInRequestBody_BadRequest",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var body = {\r",
+							"  id: 1,\r",
+							"  city : 'test city' + Date.now().toString() ,\r",
+							"  zoneId: 1,\r",
+							"  countryId: 101,\r",
+							"  countryCode: \"IN\",\r",
+							"  stateId: 4022\r",
+							"}\r",
+							" console.log(JSON.stringify(body))\r",
+							"\r",
+							"var body_str = JSON.stringify(body); \r",
+							"pm.environment.set('request_body', body_str); // this sets an environment variable with the stringified body"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"City Id Does Not Match\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate Http Status Code\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.HttpStatus).to.eql(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response message\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.Message).to.eql(\"City Id Does Not Match\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{request_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city/63",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city",
+						"63"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_Update_CityIdNotMatched_BadRequest",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var body = {\r",
+							"  id: 9999999,\r",
+							"  city : 'test city' + Date.now().toString() ,\r",
+							"  zoneId: 1,\r",
+							"  countryId: 101,\r",
+							"  countryCode: \"IN\",\r",
+							"  stateId: 4022\r",
+							"}\r",
+							" console.log(JSON.stringify(body))\r",
+							"\r",
+							"var body_str = JSON.stringify(body); \r",
+							"pm.environment.set('request_body', body_str); // this sets an environment variable with the stringified body"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"City-Id: 9999999 not found.\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate Http Status Code\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.HttpStatus).to.eql(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response message\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.Message).to.eql(\"City-Id: 9999999 not found.\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{request_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city/9999999",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city",
+						"9999999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "City_Update_CityIdNotMatched_BadRequest Copy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log(pm.collectionVariables.get('cityId'))\r",
+							"pm.variables.set('cityId',pm.collectionVariables.get('cityId'))\r",
+							"console.log(pm.variables.get('cityId'))\r",
+							"\r",
+							"var body = {\r",
+							"  id: pm.collectionVariables.get('cityId'),\r",
+							"  city : 'test city' + Date.now().toString() ,\r",
+							"  zoneId: 1,\r",
+							"  countryId: 101,\r",
+							"  countryCode: \"IN\",\r",
+							"  stateId: 4022\r",
+							"}\r",
+							" console.log(JSON.stringify(body))\r",
+							"\r",
+							"var body_str = JSON.stringify(body); \r",
+							"pm.environment.set('request_body', body_str); // this sets an environment variable with the stringified body"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"City Saved\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{request_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/city/:cityId",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"city",
+						":cityId"
+					],
+					"variable": [
+						{
+							"key": "cityId",
+							"value": "{{cityId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": 72,
+			"value": ""
+		},
+		{
+			"key": "cityId",
+			"value": ""
+		},
+		{
+			"key": "cityName",
+			"value": ""
+		},
+		{
+			"key": "url",
+			"value": "https://trac360-new-shipmentapi.azurewebsites.net"
+		}
+	]
+}
